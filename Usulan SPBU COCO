@@ -1,0 +1,57 @@
+Kamu bekerja di repository GitHub: fuelchannel2022-tech/Monitoring-Usulan-SPBU-COCO
+Situs: https://fuelchannel2022-tech.github.io/Monitoring-Usulan-SPBU-COCO/
+
+KONTEKS
+- Situs ini adalah dashboard "Dashboard 4 Tahap SPBU COCO" (monitoring usulan SPBU COCO
+  Tahap 1 Kajian Awal s.d. Tahap 4 Eksekusi + status SLA hari kerja).
+- Tampilan dan logikanya HARUS sama persis dengan versi dashboard di Claude. Satu-satunya
+  perbedaan yang diizinkan: cara ambil data (GitHub membaca CSV publik Google Sheets,
+  Claude memakai konektor).
+- Seluruh halaman ada di satu file: index.html (HTML + CSS + JS, gambar logo & foto SPBU
+  disematkan sebagai base64). Jangan dipecah ke banyak file dan jangan diubah ke framework lain.
+- Build: `npm run build` hanya menyalin index.html apa adanya ke dist/ + dist/.nojekyll.
+  Deploy otomatis lewat .github/workflows/deploy.yml (Node 22 → npm install → npm run build
+  → upload dist → deploy GitHub Pages) setiap push ke branch main.
+
+SUMBER DATA
+- Spreadsheet "Dashboard Monitoring Usulan SPBU COCO", ID ada di konstanta SHEET_ID di index.html.
+- Tab Data (gid=0) dan tab Libur (gid=510003) dibaca lewat
+  https://docs.google.com/spreadsheets/d/<SHEET_ID>/export?format=csv&gid=<GID>
+  (cadangan: gviz/tq?tqx=out:csv). Muat ulang setiap 2 menit + saat tab browser aktif lagi
+  + tombol "Muat ulang data".
+- Kolom dibaca berdasarkan JUDUL, bukan posisi: Region, Kecamatan, Kota/Kab, Provinsi,
+  Tanggal Input, item 1.1–4.5, kolom keputusan (Lanjut/Tidak Lanjut) tepat setelah item
+  terakhir tiap tahap, dan baris dengan Region = "SLA" berisi SLA kumulatif (hari kerja).
+- Isi sel item: tanggal = selesai pada tanggal itu; Done/Yes = selesai; kosong/Pending = belum.
+  Format tanggal yang harus didukung: m/d/yyyy dan d/MMM/yyyy.
+
+ATURAN SLA (jangan diubah tanpa persetujuan)
+- Hari kerja = Senin–Jumat, tidak termasuk tanggal di tab Libur.
+- Batas SLA item = Tanggal Input + SLA kumulatif (hari kerja).
+- Sisa HK = target kumulatif − hari kerja berjalan sejak Tanggal Input.
+  On Schedule: sisa > 2 HK · Warning: sisa 0–2 HK (H-2 s.d. hari H) · Due Date: sisa < 0.
+- Usulan masuk Tahap 1 jika Tanggal Input terisi; masuk tahap berikutnya jika keputusan
+  tahap sebelumnya "Lanjut". Keputusan "Tidak Lanjut" → item yang belum selesai = dihentikan,
+  bukan overdue.
+- Pencarian di header hanya mencocokkan kolom Kota/Kab (awalan "Kota", "Kab.",
+  "Kabupaten" diabaikan).
+
+ATURAN WAJIB
+1. Jangan menyertakan API key, token, password, atau data rahasia apa pun di kode.
+   Repo dan situs ini publik.
+2. Jangan mengubah isi spreadsheet, dan jangan pernah memakai data dummy/contoh sebagai
+   pengganti data operasional. Kalau data gagal dibaca, tampilkan pesan error, bukan angka palsu.
+3. Jangan pakai konektor Claude (window.claude) di versi GitHub.
+4. Jangan ubah desain (warna maroon/merah Pertamina, font Poppins, ikon 3D maroon, header foto
+   SPBU penuh, kartu 4 tahap, Status SLA, Daftar overdue, panel Tahap, Log Aktivitas) kecuali
+   saya minta. Setiap perubahan tampilan harus diterapkan juga ke versi Claude agar tetap sama.
+5. Pastikan tampilan rapi di desktop dan HP (lebar 400px), tanpa scroll horizontal.
+
+TUGAS SAAT INI
+[tulis perubahan yang Anda inginkan di sini]
+
+SETELAH SELESAI
+- Jalankan `npm run build` dan pastikan dist/index.html sama byte per byte dengan index.html.
+- Cari "AIza", "token", "secret", "apikey" di repo dan pastikan tidak ada kredensial.
+- Commit dengan pesan yang jelas, push ke main, lalu cek GitHub Actions sampai deploy sukses.
+- Laporkan apa yang berubah dan link situsnya.
